@@ -33,7 +33,7 @@ basemap <- ggplot() +
   theme_void() +
   coord_equal()
 
-# Define UI for application that draws a histogram
+# Define UI for application
 ui <- fluidPage(
    
    # Application title
@@ -60,9 +60,12 @@ ui <- fluidPage(
      ),
         
      mainPanel(tabsetPanel(type = "tabs",
-                tabPanel("Cities Compared", plotOutput("map"), uiOutput("plots")),
-                tabPanel("City Systems Compared"),
-                tabPanel("System Indicators Compared")
+                tabPanel("Cities Compared", plotOutput("map")),
+                tabPanel("City Systems Compared", uiOutput("subsysplots")),
+                tabPanel("System Indicators Compared", uiOutput("indicatorplots")),
+                tabPanel("Controls Tab"),
+                tabPanel("Data Input"),
+                tabPanel("Documentation")
                 )
         )
    
@@ -74,7 +77,9 @@ server <- function(input, output) {
 
   output$map <- renderPlot({
     #cities <- head(worldcities.df[worldcities.df$CONTINENT %in% input$AOR, 1])
-    basemap + geom_point(dat = filter(worldcities.df, city %in% input$chosencities), aes(x = lng, y = lat))   
+    basemap + geom_point(dat = filter(worldcities.df, 
+                                      (city %in% input$chosencities & CONTINENT %in% input$AOR)), 
+                         aes(x = lng, y = lat))   
   })
    
   output$cityControls <- renderUI({
@@ -83,7 +88,7 @@ server <- function(input, output) {
    })
   
   max_plots <- 3
-  output$plots <- renderUI({
+  output$subsysplots <- renderUI({
     plot_output_list <- lapply(1:length(input$chosencities), function(i) {
       plotname <- paste("plot", i, sep="")
       plotOutput(plotname, height = 280, width = 250)
